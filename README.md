@@ -26,10 +26,10 @@ Solución de BI de extremo a extremo para las líneas de envasado de vinilos: ET
 ## 3. Conexión a powerBi y Grafana
   ### PowerBI
   Ingrese al archivo de powerBI (/powerbi/dashboardpowerbi_.pbip) realice la conexión a la BD con sus credenciales de 
-  HOST:
-  DATABASE_NAME:
-  USER:
-  PASSWORD:
+  - HOST:
+  - DATABASE_NAME:
+  - USER:
+  - PASSWORD:
 
   para evitar errores de SSL puede desactivar la encriptación o descargar el certificado
 
@@ -39,10 +39,10 @@ Solución de BI de extremo a extremo para las líneas de envasado de vinilos: ET
 
   Ingrese a la web de Grafana Dashboards, diríjase al apartado de "conections" -> "Data sources" -> "Add new data sources" -> seleccione la opcion de postgres y llene los datos:
 
-  HOST:
-  DATABASE_NAME:
-  USER:
-  PASSWORD:
+  - HOST:
+  - DATABASE_NAME:
+  - USER:
+  - PASSWORD:
 
   haga el test de conexion y guardela
   
