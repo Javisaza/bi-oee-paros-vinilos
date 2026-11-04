@@ -1,0 +1,1575 @@
+{
+  "apiVersion": "dashboard.grafana.app/v2",
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "di88ndm",
+    "namespace": "stacks-1860485",
+    "uid": "4ff14d5b-9ed5-47b8-a0b8-e983560aa3a7",
+    "resourceVersion": "2118055120731160576",
+    "generation": 40,
+    "creationTimestamp": "2026-11-02T17:32:03Z",
+    "labels": {
+      "grafana.app/deprecatedInternalID": "616945250103296"
+    },
+    "annotations": {
+      "grafana.app/createdBy": "user:fg0jmwev2ckcgc",
+      "grafana.app/saved-from-ui": "Grafana Cloud",
+      "grafana.app/updatedBy": "user:eg37tnpj9gni8f",
+      "grafana.app/updatedTimestamp": "2026-11-04T18:57:46Z"
+    }
+  },
+  "spec": {
+    "annotations": [
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana",
+            "version": "v0",
+            "datasource": {
+              "name": "-- Grafana --"
+            },
+            "spec": {}
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "builtIn": true
+        }
+      }
+    ],
+    "cursorSync": "Off",
+    "editable": true,
+    "elements": {
+      "panel-1": {
+        "kind": "Panel",
+        "spec": {
+          "id": 1,
+          "title": "Disponibilidad",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "eg33rx0lopb0gf"
+                      },
+                      "spec": {
+                        "dataset": "postgres",
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "WITH paros_agrupados AS (\r\n  SELECT \r\n    fk_registro_produccion,\r\n    SUM(tiempo_paro_minutos) AS total_minutos_paro\r\n  FROM public.registros_paro\r\n  GROUP BY fk_registro_produccion\r\n)\r\nSELECT \r\n  ROUND(\r\n    CAST(\r\n      (1 - (COALESCE(SUM(p.total_minutos_paro), 0) / NULLIF(SUM(rp.horas_trabajadas * 60), 0))) * 100 \r\n      AS numeric\r\n    ), \r\n    2\r\n  ) AS \"Disponibilidad (%)\"\r\nFROM public.registros_produccion rp\r\nLEFT JOIN paros_agrupados p ON rp.id = p.fk_registro_produccion\r\nWHERE \r\n  -- 1. Filtro dinámico de Período (Días, Meses, 1-5 Años)\r\n  CASE '${periodo}'\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  -- 2. Filtro de Máquina\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- 3. Filtro de Turno\r\n  AND rp.fk_turno IN ($turno);",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "gauge",
+            "version": "13.4.0-41805046240",
+            "spec": {
+              "options": {
+                "barShape": "rounded",
+                "barWidthFactor": 0.25,
+                "effects": {
+                  "barGlow": true,
+                  "centerGlow": true,
+                  "gradient": true
+                },
+                "endpointMarker": "glow",
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "segmentCount": 10,
+                "segmentSpacing": 0.15,
+                "shape": "gauge",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": false,
+                "sizing": "auto",
+                "sparkline": true,
+                "textMode": "auto"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "displayName": "Disponibilidad",
+                  "unit": "percent",
+                  "decimals": 2,
+                  "min": 0,
+                  "max": 100,
+                  "thresholds": {
+                    "mode": "percentage",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "red"
+                      },
+                      {
+                        "value": 70,
+                        "color": "#EAB839"
+                      },
+                      {
+                        "value": 85,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds",
+                    "fixedColor": "yellow"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-10": {
+        "kind": "Panel",
+        "spec": {
+          "id": 10,
+          "title": "Tiempo de paro por Area",
+          "description": "",
+          "subtitle": "tiempo en minutos",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "eg33rx0lopb0gf"
+                      },
+                      "spec": {
+                        "dataset": "postgres",
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT \r\n  ai.descripcion AS \"Área de Impacto\",\r\n  ROUND(CAST(SUM(p.tiempo_paro_minutos) AS numeric), 2) AS \"Tiempo Paro (Minutos)\"\r\nFROM public.registros_paro p\r\nJOIN public.subcodigo_paro sp ON p.fk_subcodigo_paro = sp.id\r\nJOIN public.codigo_paro cp ON sp.fk_codigo_paro = cp.id\r\nJOIN public.area_impacto ai ON cp.fk_area_impacto = ai.id\r\nJOIN public.registros_produccion rp ON p.fk_registro_produccion = rp.id\r\nWHERE \r\n  -- 1. Filtro dinámico de Período\r\n  CASE '${periodo}'\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  -- 2. Filtro de Máquina\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- 3. Filtro de Turno (incluyendo nulos)\r\n  AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL)\r\nGROUP BY ai.descripcion\r\nORDER BY \"Tiempo Paro (Minutos)\" DESC;",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "piechart",
+            "version": "13.4.0-41805046240",
+            "spec": {
+              "options": {
+                "displayLabels": [
+                  "value"
+                ],
+                "legend": {
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true,
+                  "values": [
+                    "percent"
+                  ]
+                },
+                "pieType": "donut",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                },
+                "sort": "desc",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "multi",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "none",
+                  "color": {
+                    "mode": "palette-classic",
+                    "fixedColor": "#73BF69"
+                  },
+                  "custom": {
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-2": {
+        "kind": "Panel",
+        "spec": {
+          "id": 2,
+          "title": "Producción Esperada VS Producción Real",
+          "description": "",
+          "subtitle": "(Por maquina)",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "eg33rx0lopb0gf"
+                      },
+                      "spec": {
+                        "dataset": "postgres",
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT \r\n  m.nombre AS \"Máquina\",\r\n  ROUND(\r\n    CAST(SUM(rp.pacas_producidas) / NULLIF(SUM(rp.horas_trabajadas), 0) AS numeric), \r\n    2\r\n  ) AS \"Velocidad Real (Pacas/Hora)\",\r\n  ROUND(\r\n    CAST(AVG(pr.pacas_ideales_turno / NULLIF(pr.horas_trabajadas, 0)) AS numeric), \r\n    2\r\n  ) AS \"Velocidad Nominal\"\r\nFROM public.registros_produccion rp\r\nJOIN public.maquinas m ON rp.fk_maquina = m.id\r\nLEFT JOIN public.produccion_referencia pr \r\n  ON rp.fk_maquina = pr.fk_maquina \r\n AND rp.fk_referencia = pr.fk_referencia\r\nWHERE \r\n  -- 1. Filtro dinámico de Período\r\n  CASE '${periodo}'\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  -- 2. Filtro de Máquina\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- 3. Filtro de Turno (incluyendo nulos)\r\n  AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL)\r\nGROUP BY m.nombre\r\nORDER BY \"Velocidad Real (Pacas/Hora)\" DESC;",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "barchart",
+            "version": "13.4.0-41805046240",
+            "spec": {
+              "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "orientation": "horizontal",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                },
+                "xField": "Máquina",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "blue"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": true,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "series",
+                    "axisGridShow": false,
+                    "axisLabel": "Pacas/hora",
+                    "axisPlacement": "left",
+                    "fillOpacity": 80,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineWidth": 1,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Velocidad Real (Pacas/Hora)"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "semi-dark-green",
+                          "mode": "shades"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Velocidad Nominal"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "blue",
+                          "mode": "shades"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "panel-3": {
+        "kind": "Panel",
+        "spec": {
+          "id": 3,
+          "title": "Alertas De Paros Prolongados",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "eg33rx0lopb0gf"
+                      },
+                      "spec": {
+                        "dataset": "postgres",
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT \r\n  rp.fecha AS \"Fecha\",\r\n  m.nombre AS \"Línea/Máquina\",\r\n  COALESCE(sp.descripcion, cp.descripcion) AS \"Causa del Paro\",\r\n  p.tiempo_paro_minutos AS \"Duración (Min)\",\r\n  CASE \r\n    WHEN p.tiempo_paro_minutos >= 30 THEN 'CRÍTICO'\r\n    WHEN p.tiempo_paro_minutos >= 15 THEN 'ADVERTENCIA'\r\n    ELSE 'NORMAL'\r\n  END AS \"Nivel de Alerta\"\r\nFROM public.registros_paro p\r\nJOIN public.registros_produccion rp ON p.fk_registro_produccion = rp.id\r\nJOIN public.maquinas m ON rp.fk_maquina = m.id\r\nLEFT JOIN public.subcodigo_paro sp ON p.fk_subcodigo_paro = sp.id\r\nLEFT JOIN public.codigo_paro cp ON sp.fk_codigo_paro = cp.id\r\nWHERE p.tiempo_paro_minutos >= 15\r\n  -- 1. Filtro dinámico de Período (reemplaza a $__timeFilter directo)\r\n  AND CASE '${periodo}'\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  -- 2. Filtro de Máquina\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- 3. Filtro de Turno (incluyendo nulos)\r\n  AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL)\r\nORDER BY rp.fecha DESC;",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "table",
+            "version": "13.4.0-41805046240",
+            "spec": {
+              "options": {
+                "cellHeight": "sm",
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": true,
+                    "displayName": "Fecha"
+                  }
+                ],
+                "zebraStriping": false
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "mappings": [
+                    {
+                      "type": "value",
+                      "options": {
+                        "ADVERTENCIA": {
+                          "text": "ADVERTENCIA",
+                          "color": "orange",
+                          "index": 1
+                        },
+                        "CRÍTICO": {
+                          "text": "CRÍTICO",
+                          "color": "red",
+                          "index": 0
+                        }
+                      }
+                    }
+                  ],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "continuous-GrYlRd"
+                  },
+                  "custom": {
+                    "align": "auto",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "footer": {
+                      "reducers": []
+                    },
+                    "hideFrom": {
+                      "viz": false
+                    },
+                    "inspect": false
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Nivel de Alerta"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-background"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Causa del Paro"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 205
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Duración (Min)"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 127
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "panel-5": {
+        "kind": "Panel",
+        "spec": {
+          "id": 5,
+          "title": "Indicadores superiores de rendimiento",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "eg33rx0lopb0gf"
+                      },
+                      "spec": {
+                        "dataset": "postgres",
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "WITH pr_unica AS (\r\n  SELECT \r\n    fk_maquina,\r\n    fk_referencia,\r\n    AVG(pacas_ideales_turno / NULLIF(horas_trabajadas, 0)) AS velocidad_nominal\r\n  FROM public.produccion_referencia\r\n  GROUP BY fk_maquina, fk_referencia\r\n)\r\nSELECT \r\n  SUM(rp.pacas_producidas) AS \"Producción Real (Pacas)\",\r\n  \r\n  ROUND(CAST(\r\n    SUM(rp.horas_trabajadas * COALESCE(pr.velocidad_nominal, 0))\r\n  AS numeric), 2) AS \"Capacidad Máxima Teórica (Pacas)\",\r\n\r\n  ROUND(CAST(\r\n    COALESCE(\r\n      (SUM(rp.pacas_producidas) / NULLIF(SUM(rp.horas_trabajadas * COALESCE(pr.velocidad_nominal, 0)), 0)) * 100,\r\n      0\r\n    ) AS numeric\r\n  ), 2) AS \"Rendimiento (%)\"\r\n\r\nFROM public.registros_produccion rp\r\nLEFT JOIN pr_unica pr \r\n  ON rp.fk_maquina = pr.fk_maquina \r\n AND rp.fk_referencia = pr.fk_referencia\r\nWHERE \r\n  -- 1. Filtro dinámico de Período\r\n  CASE '${periodo}'\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  -- 2. Filtro de Máquina\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- 3. Filtro de Turno (incluyendo nulos)\r\n  AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL);",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "gauge",
+            "version": "13.4.0-41805046240",
+            "spec": {
+              "options": {
+                "barShape": "flat",
+                "barWidthFactor": 0.54,
+                "effects": {
+                  "barGlow": false,
+                  "centerGlow": false,
+                  "gradient": true
+                },
+                "endpointMarker": "point",
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "segmentCount": 1,
+                "segmentSpacing": 0.3,
+                "shape": "gauge",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto",
+                "sparkline": true,
+                "textMode": "auto"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "percentage",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 60,
+                        "color": "#EAB839"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "continuous-GrYlRd"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-6": {
+        "kind": "Panel",
+        "spec": {
+          "id": 6,
+          "title": "Comparación de producción esperada por referencia",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "eg33rx0lopb0gf"
+                      },
+                      "spec": {
+                        "dataset": "postgres",
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "WITH pr_unica AS (\r\n  SELECT \r\n    fk_maquina,\r\n    fk_referencia,\r\n    AVG(pacas_ideales_turno / NULLIF(horas_trabajadas, 0)) AS velocidad_nominal\r\n  FROM public.produccion_referencia\r\n  GROUP BY fk_maquina, fk_referencia\r\n)\r\nSELECT \r\n  rp.fecha AS \"Fecha\",\r\n  m.nombre AS \"Máquina\",\r\n  rp.fk_referencia AS \"Referencia\",\r\n  rp.pacas_producidas AS \"Pacas Reales\",\r\n  ROUND(CAST(rp.horas_trabajadas * COALESCE(pr.velocidad_nominal, 0) AS numeric), 2) AS \"Pacas Esperadas\",\r\n  ROUND(CAST(\r\n    COALESCE(\r\n      (rp.pacas_producidas / NULLIF(rp.horas_trabajadas * COALESCE(pr.velocidad_nominal, 0), 0)) * 100,\r\n      0\r\n    ) AS numeric\r\n  ), 2) AS \"% Cumplimiento\"\r\nFROM public.registros_produccion rp\r\nJOIN public.maquinas m ON rp.fk_maquina = m.id\r\nLEFT JOIN pr_unica pr \r\n  ON rp.fk_maquina = pr.fk_maquina \r\n AND rp.fk_referencia = pr.fk_referencia\r\nWHERE \r\n  -- 1. Filtro dinámico de Período\r\n  CASE '${periodo}'\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  -- 2. Filtro de Máquina\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- 3. Filtro de Turno (incluyendo nulos)\r\n  AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL)\r\nORDER BY rp.fecha DESC;",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "table",
+            "version": "13.4.0-41805046240",
+            "spec": {
+              "options": {
+                "cellHeight": "sm",
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": false,
+                    "displayName": "Fecha"
+                  }
+                ],
+                "zebraStriping": false
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 98,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 99,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "custom": {
+                    "align": "auto",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "footer": {
+                      "reducers": []
+                    },
+                    "hideFrom": {
+                      "viz": false
+                    },
+                    "inspect": true
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Reales (Meta Cumplida)"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 94
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Reales (Bajo Meta)"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 50
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "% Cumplimiento"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-background"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "panel-7": {
+        "kind": "Panel",
+        "spec": {
+          "id": 7,
+          "title": "Disponibilidad por maquina",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "eg33rx0lopb0gf"
+                      },
+                      "spec": {
+                        "dataset": "postgres",
+                        "editorMode": "code",
+                        "format": "time_series",
+                        "rawQuery": true,
+                        "rawSql": "WITH base_tiempos AS (\r\n  SELECT DISTINCT\r\n    $__timeGroup(fecha, $__interval) AS epoch_time\r\n  FROM public.dim_tiempo\r\n  WHERE \r\n    CASE '${periodo}'\r\n      WHEN 'hoy'              THEN fecha = CURRENT_DATE\r\n      WHEN 'Hoy'              THEN fecha = CURRENT_DATE\r\n      WHEN 'ayer'             THEN fecha = CURRENT_DATE - INTERVAL '1 day'\r\n      WHEN 'Ayer'             THEN fecha = CURRENT_DATE - INTERVAL '1 day'\r\n      WHEN '7d'               THEN fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n      WHEN 'Últimos 7 Días'   THEN fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n      WHEN '30d'              THEN fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n      WHEN 'Últimos 30 Días'  THEN fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n      WHEN 'este_mes'         THEN fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n      WHEN 'Este Mes'         THEN fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n      WHEN 'este_anio'        THEN fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n      WHEN 'Año Actual (YTD)' THEN fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n      WHEN '1_anio'           THEN fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n      WHEN 'Último Año'       THEN fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n      WHEN '3_anios'          THEN fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n      WHEN 'Últimos 3 Años'   THEN fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n      WHEN '5_anios'          THEN fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n      WHEN 'Últimos 5 Años'   THEN fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n      ELSE $__timeFilter(fecha)\r\n    END\r\n),\r\nmaquinas_filtro AS (\r\n  SELECT id, nombre \r\n  FROM public.maquinas \r\n  WHERE id IN ($maquina)\r\n),\r\nparos_consolidados AS (\r\n  SELECT \r\n    fk_registro_produccion, \r\n    SUM(tiempo_paro_minutos) AS total_paro_min\r\n  FROM public.registros_paro\r\n  GROUP BY fk_registro_produccion\r\n),\r\ndatos_registrados AS (\r\n  SELECT\r\n    $__timeGroup(rp.fecha, $__interval) AS epoch_time,\r\n    rp.fk_maquina,\r\n    SUM(rp.horas_trabajadas) AS total_horas,\r\n    COALESCE(SUM(p.total_paro_min), 0) AS total_paro_min\r\n  FROM public.registros_produccion rp\r\n  LEFT JOIN paros_consolidados p ON rp.id = p.fk_registro_produccion\r\n  WHERE \r\n    -- 1. Filtro dinámico de Período\r\n    CASE '${periodo}'\r\n      WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n      WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n      WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n      WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n      WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n      WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n      WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n      WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n      WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n      WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n      WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n      WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n      WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n      WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n      WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n      WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n      WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n      WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n      ELSE $__timeFilter(rp.fecha)\r\n    END\r\n    -- 2. Filtro de Máquina\r\n    AND rp.fk_maquina IN ($maquina)\r\n    -- 3. Filtro de Turno (incluyendo nulos)\r\n    AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL)\r\n  GROUP BY 1, rp.fk_maquina\r\n)\r\nSELECT\r\n  bt.epoch_time AS \"time\",\r\n  m.nombre AS \"metric\",\r\n  CASE \r\n    -- Si no hay registros de producción o las horas son 0, la disponibilidad por defecto es 100%\r\n    WHEN dr.fk_maquina IS NULL OR dr.total_horas IS NULL OR dr.total_horas = 0 THEN 100.00\r\n    ELSE GREATEST(\r\n      0.00,\r\n      ROUND(\r\n        CAST((1 - (dr.total_paro_min / NULLIF(dr.total_horas * 60, 0))) * 100 AS numeric),\r\n        2\r\n      )\r\n    )\r\n  END AS \"value\"\r\nFROM base_tiempos bt\r\nCROSS JOIN maquinas_filtro m\r\nLEFT JOIN datos_registrados dr \r\n  ON bt.epoch_time = dr.epoch_time \r\n AND m.id = dr.fk_maquina\r\nORDER BY 1 ASC;",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.4.0-41805046240",
+            "spec": {
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "min": 0,
+                  "max": 100,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineStyle": {
+                      "fill": "solid"
+                    },
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "always",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-8": {
+        "kind": "Panel",
+        "spec": {
+          "id": 8,
+          "title": "Minutos y cantidad de paros por Tipo Paro",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "eg33rx0lopb0gf"
+                      },
+                      "spec": {
+                        "dataset": "postgres",
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT \r\n  cp.descripcion AS \"Código de Paro\",\r\n  COUNT(p.id) AS \"Cantidad de Paros\",\r\n  ROUND(CAST(SUM(p.tiempo_paro_minutos) AS numeric), 2) AS \"Tiempo Total (Minutos)\"\r\nFROM public.registros_paro p\r\nJOIN public.subcodigo_paro sp ON p.fk_subcodigo_paro = sp.id\r\nJOIN public.codigo_paro cp ON sp.fk_codigo_paro = cp.id\r\nJOIN public.registros_produccion rp ON p.fk_registro_produccion = rp.id\r\nWHERE \r\n  -- 1. Filtro dinámico de Período\r\n  CASE '${periodo}'\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  -- 2. Filtro de Máquina\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- 3. Filtro de Turno (incluyendo nulos)\r\n  AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL)\r\nGROUP BY cp.id, cp.descripcion\r\nHAVING COUNT(p.id) > 0 AND SUM(p.tiempo_paro_minutos) > 0\r\nORDER BY \"Tiempo Total (Minutos)\" DESC;",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "barchart",
+            "version": "13.4.0-41805046240",
+            "spec": {
+              "options": {
+                "barRadius": 0.05,
+                "barWidth": 0.95,
+                "fullHighlight": false,
+                "groupWidth": 0.8,
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "orientation": "horizontal",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                },
+                "xField": "time",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 100
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "fillOpacity": 100,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineWidth": 0,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-9": {
+        "kind": "Panel",
+        "spec": {
+          "id": 9,
+          "title": "",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "eg33rx0lopb0gf"
+                      },
+                      "spec": {
+                        "dataset": "postgres",
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT COALESCE(SUM(p.tiempo_paro_minutos), 0) AS \"Minutos de Paro Totales\"\r\nFROM public.registros_paro p\r\nJOIN public.registros_produccion rp ON p.fk_registro_produccion = rp.id\r\nWHERE \r\n  CASE '${periodo}'\r\n    -- Evalúa estrictamente la fecha actual del servidor\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- Incluye el turno seleccionado O aquellos registros con turno nulo\r\n  AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL);",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.4.0-41805046240",
+            "spec": {
+              "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "semi-dark-blue"
+                      },
+                      {
+                        "value": 80,
+                        "color": "dark-yellow"
+                      },
+                      {
+                        "value": 100,
+                        "color": "light-yellow"
+                      },
+                      {
+                        "value": 120,
+                        "color": "light-orange"
+                      },
+                      {
+                        "value": 157,
+                        "color": "dark-orange"
+                      },
+                      {
+                        "value": 170,
+                        "color": "light-red"
+                      },
+                      {
+                        "value": 180,
+                        "color": "dark-red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds",
+                    "fixedColor": "#ad46ff"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      }
+    },
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-9"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 6,
+              "y": 0,
+              "width": 18,
+              "height": 7,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-3"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 5,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-1"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 7,
+              "width": 17,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-2"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 17,
+              "y": 7,
+              "width": 7,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-10"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 15,
+              "width": 24,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-7"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 23,
+              "width": 24,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-6"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 31,
+              "width": 24,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-5"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 35,
+              "width": 24,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-8"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "links": [],
+    "liveNow": false,
+    "preload": false,
+    "tags": [],
+    "timeSettings": {
+      "timezone": "browser",
+      "from": "2026-11-02T14:14:14.014Z",
+      "to": "2026-11-02T20:14:14.014Z",
+      "autoRefresh": "10s",
+      "autoRefreshIntervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "hideTimepicker": false,
+      "fiscalYearStartMonth": 0
+    },
+    "title": "Seguimiento Vinilos y pinturas",
+    "variables": [
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "maquina",
+          "current": {
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
+          },
+          "label": "Maquina",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana-postgresql-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "eg33rx0lopb0gf"
+            },
+            "spec": {
+              "dataset": "postgres",
+              "editorMode": "code",
+              "format": "table",
+              "query": "SELECT nombre AS __text, id AS __value FROM public.maquinas ORDER BY nombre;",
+              "rawQuery": true,
+              "rawSql": "SELECT nombre AS __text, id AS __value FROM public.maquinas ORDER BY nombre;",
+              "refId": "SQLVariableQueryEditor-VariableQuery",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          },
+          "regex": "",
+          "regexApplyTo": "value",
+          "sort": "disabled",
+          "definition": "SELECT nombre AS __text, id AS __value FROM public.maquinas ORDER BY nombre;",
+          "options": [],
+          "multi": true,
+          "includeAll": true,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "periodo",
+          "query": "Hoy : hoy, Ayer : ayer, Últimos 7 Días : 7d, Últimos 30 Días : 30d, Este Mes : este_mes, Año Actual (YTD) : este_anio, Último Año : 1_anio, Últimos 3 Años : 3_anios, Últimos 5 Años : 5_anios, Rango del Dashboard : global",
+          "current": {
+            "text": "Hoy",
+            "value": "hoy"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "Periodo de tiempo",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true,
+          "valuesFormat": "csv"
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "turno",
+          "current": {
+            "text": [
+              "All"
+            ],
+            "value": [
+              "$__all"
+            ]
+          },
+          "label": "Turno",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana-postgresql-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "eg33rx0lopb0gf"
+            },
+            "spec": {
+              "dataset": "postgres",
+              "editorMode": "code",
+              "format": "table",
+              "query": "SELECT descripcion AS __text, id AS __value \r\nFROM public.turno \r\nORDER BY id;",
+              "rawQuery": true,
+              "rawSql": "SELECT descripcion AS __text, id AS __value \r\nFROM public.turno \r\nORDER BY id;",
+              "refId": "SQLVariableQueryEditor-VariableQuery",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          },
+          "regex": "",
+          "regexApplyTo": "value",
+          "sort": "disabled",
+          "definition": "SELECT descripcion AS __text, id AS __value \r\nFROM public.turno \r\nORDER BY id;",
+          "options": [],
+          "multi": true,
+          "includeAll": true,
+          "allowCustomValue": true
+        }
+      }
+    ],
+    "preferences": {
+      "layout": {
+        "kind": "AutoGridLayout",
+        "spec": {
+          "maxColumnCount": 3,
+          "columnWidthMode": "standard",
+          "rowHeightMode": "standard",
+          "items": []
+        }
+      }
+    }
+  }
+}
