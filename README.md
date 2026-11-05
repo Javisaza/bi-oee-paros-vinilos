@@ -1,51 +1,91 @@
-# bi-oee-paros-vinilos
-Solución de BI de extremo a extremo para las líneas de envasado de vinilos: ETL en Python, modelo dimensional en PostgreSQL, tablero analítico en Power BI y monitoreo con alertas en Grafana. Indicadores de OEE y análisis de paros.  Topics: business-intelligence, oee, postgresql, power-bi, grafana, etl, python, data-warehouse.
+
+# BI OEE & Análisis de Paros - Línea de Vinilos
+
+Solución de Inteligencia de Negocios de extremo a extremo para el monitoreo de las líneas de envasado de vinilos. Este proyecto integra la extracción de datos, modelado dimensional, visualización y alertas en tiempo real para el cálculo del OEE y el análisis de tiempos perdidos.
+
+**Tecnologías:** `Python` (ETL) | `PostgreSQL / Supabase` (Data Warehouse) | `Power BI` (Dashboard) | `Grafana` (Alertas y Monitoreo).
+
+## Estructura Github
+
+  bi-oee-paros-vinilos/
+  ├── sql/
+  │   ├── createtables.sql
+  │   ├── insertsestaticos.sql
+  │   └── createcalendario.sql
+  ├── etl/
+  │   └── postgres/
+  │       ├── insert2.0(pgadmin).py
+  │       └── insertreferencias.py
+  ├── grafana/
+  │   └── dashboardgrafana.json
+  ├── powerbi/
+  │   ├── dashboardpowerbi.Report/
+  │   └── definition.pbir
+  ├── doc/
+  │   └── BI_ProyectoFinal_Javier_Isaza-Diego_Mazo.pdf
+  └── README.md
+
+## Proceso para reproducir la solución desde cero
+
+### 1. Preparación de la Base de Datos (DDL y Datos Estáticos)
+En PostgreSQL o Supabase (la plataforma de tu elección), ejecuta los scripts SQL en el siguiente orden estricto para construir el esquema relacional y poblar los catálogos:
+
+1. `createtables.sql`
+2. `insertestaticos.sql`
+3. `createcalendario.sql`
+4. `triggerslogicanegocio.sql`
+
+> **Nota:** Todos estos archivos se encuentran en la carpeta `/sql`. Al finalizar, tendrás la estructura de tablas completa y los datos estáticos (máquinas, turnos, áreas, etc.) listos.
+
+### 2. Ejecución del ETL en Python
+Dirígete a la carpeta `/etl/postgres`. Antes de ejecutar los scripts, asegúrate de configurar tus credenciales y dependencias:
+
+1. Instala las dependencias necesarias (se recomienda usar un entorno virtual):
+
+   pip install -r requirements.txt
+
+2. Configura la variable `DB_URI` con la cadena de conexión de tu base de datos dentro de los scripts.
+3. Ejecuta los archivos en este orden:
+* `insertreferencias.py`
+* `Insert2.0(pgadmin).py` *(Asegúrate de incluir la extensión .py)*
 
 
-# Proceso para reproducir la solución desde 0:
 
-## 1. Preparación de la base de datos (BD) e inserción de datos estáticos 
-  En PostgreSQL o Supabase la plataforma que sea de su elección ejecute los archivos en este orden
+> **Nota:** Dependiendo del motor de la BD y la latencia, este proceso tomará algo de tiempo. Espera hasta ver el mensaje de finalización en la consola.
 
-  - createtables.sql
-  - insertestaticos.sql
-  - createcalendario.sql
-  - triggerslogicanegocio.sql
+### 3. Conexión a Power BI y Grafana
 
-  todos estos archivos estan en la carpeta (/sql). Con esto ya tendra el DDL en su base de datos correctamente y los datos estaticos como las maquinas, turnos,etc
+#### Power BI
 
-## 2. Ejecución del ETL en Python
-   Ahora en la carpeta (/etl/postgres) deberá ejecutar los archivos .py en el siguiente orden, antes de ejecutarlo deberá escribir la DB_URI de su base de datos para que le inserte los datos correctamente:
-   - insertreferncias.py
-   - Insert2.0(pgadmin)
-  
-   (dependiendo del motor de la BD el proceso puede demorar más o menos tiempo, tenga paciencia, cuando finalice vera en la consola un mensaje de finalizacion)
+Abre el archivo de proyecto `/powerbi/dashboardpowerbi_.pbip` y actualiza las credenciales de origen de datos:
 
-  De esta manera ya tendrá organizados y cargados los datos iniciales
+* **Servidor (Host):** `tu_host` *(Si usas Supabase, usa el puerto del Connection Pooler, ej: `aws-0-xx.pooler.supabase.com:6543`)*
+* **Base de datos:** `postgres`
+* **Usuario:** `tu_usuario` *(En Supabase, incluye el ID del proyecto, ej: `postgres.tu_ref_proyecto`)*
+* **Contraseña:** `tu_password`
 
-## 3. Conexión a powerBi y Grafana
-  ### PowerBI
-  Ingrese al archivo de powerBI (/powerbi/dashboardpowerbi_.pbip) realice la conexión a la BD con sus credenciales de 
-  - HOST:
-  - DATABASE_NAME:
-  - USER:
-  - PASSWORD:
+**Solución a errores de Certificado SSL:**
+Si experimentas errores de validación, deshabilita la encriptación estricta:
 
-  para evitar errores de SSL puede desactivar la encriptación o descargar el certificado
+1. Ve a **Archivo** > **Opciones y configuración** > **Configuración de origen de datos**.
+2. Selecciona tu conexión PostgreSQL y haz clic en **Editar permisos**.
+3. Desmarca la casilla **"Cifrar conexiones"**, guarda los cambios y presiona **Actualizar**.
 
-  Para deshabilitar la encriptación ingrese a la sección "Archivo" -> "Opciones y configuraciones" -> "Configuración de Origen de Datos" -> "Editar Permisos"(Sobre su fuente de datos) -> y quite la selección de "Cifrar conexiones", guarde los cambios y continue
+#### Grafana
 
-  ### Grafana
+Ingresa a tu entorno de Grafana y configura la conexión a la base de datos:
 
-  Ingrese a la web de Grafana Dashboards, diríjase al apartado de "conections" -> "Data sources" -> "Add new data sources" -> seleccione la opcion de postgres y llene los datos:
-
-  - HOST:
-  - DATABASE_NAME:
-  - USER:
-  - PASSWORD:
-
-  haga el test de conexion y guardela
-  
+1. Ve a **Connections** > **Data sources** > **Add new data source**.
+2. Selecciona **PostgreSQL** y completa los parámetros:
+* **Host:** `tu_host:puerto`
+* **Database:** `tu_base_de_datos`
+* **User:** `tu_usuario`
+* **Password:** `tu_password`
 
 
+3. **TLS/SSL Mode:** Configúralo en `disable` o `require` según la política de tu servidor.
+4. Haz clic en **Save & Test** para confirmar la conexión.
 
+```
+
+```
