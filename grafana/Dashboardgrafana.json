@@ -3,19 +3,19 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "di88ndm",
-    "namespace": "stacks-1860485",
-    "uid": "4ff14d5b-9ed5-47b8-a0b8-e983560aa3a7",
-    "resourceVersion": "2118055120731160576",
-    "generation": 40,
-    "creationTimestamp": "2026-11-02T17:32:03Z",
+    "namespace": "default",
+    "uid": "01491dc9-d2a3-4ae1-8491-153c142323a9",
+    "resourceVersion": "1793850990422004",
+    "generation": 11,
+    "creationTimestamp": "2026-11-05T03:36:44Z",
     "labels": {
-      "grafana.app/deprecatedInternalID": "616945250103296"
+      "grafana.app/deprecatedInternalID": "1493897102663680"
     },
     "annotations": {
-      "grafana.app/createdBy": "user:fg0jmwev2ckcgc",
-      "grafana.app/saved-from-ui": "Grafana Cloud",
-      "grafana.app/updatedBy": "user:eg37tnpj9gni8f",
-      "grafana.app/updatedTimestamp": "2026-11-04T18:57:46Z"
+      "grafana.app/createdBy": "user:bg3chrwwkmw3ke",
+      "grafana.app/saved-from-ui": "Grafana v13.3.0 (6f8ce3c693)",
+      "grafana.app/updatedBy": "user:bg3chrwwkmw3ke",
+      "grafana.app/updatedTimestamp": "2026-11-05T03:56:30Z"
     }
   },
   "spec": {
@@ -62,7 +62,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "eg33rx0lopb0gf"
+                        "name": "ag3ci778ps7wgc"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -101,7 +101,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "gauge",
-            "version": "13.4.0-41805046240",
+            "version": "13.3.0",
             "spec": {
               "options": {
                 "barShape": "rounded",
@@ -186,14 +186,14 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "eg33rx0lopb0gf"
+                        "name": "ag3ci778ps7wgc"
                       },
                       "spec": {
                         "dataset": "postgres",
                         "editorMode": "code",
                         "format": "table",
                         "rawQuery": true,
-                        "rawSql": "SELECT \r\n  ai.descripcion AS \"Área de Impacto\",\r\n  ROUND(CAST(SUM(p.tiempo_paro_minutos) AS numeric), 2) AS \"Tiempo Paro (Minutos)\"\r\nFROM public.registros_paro p\r\nJOIN public.subcodigo_paro sp ON p.fk_subcodigo_paro = sp.id\r\nJOIN public.codigo_paro cp ON sp.fk_codigo_paro = cp.id\r\nJOIN public.area_impacto ai ON cp.fk_area_impacto = ai.id\r\nJOIN public.registros_produccion rp ON p.fk_registro_produccion = rp.id\r\nWHERE \r\n  -- 1. Filtro dinámico de Período\r\n  CASE '${periodo}'\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  -- 2. Filtro de Máquina\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- 3. Filtro de Turno (incluyendo nulos)\r\n  AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL)\r\nGROUP BY ai.descripcion\r\nORDER BY \"Tiempo Paro (Minutos)\" DESC;",
+                        "rawSql": "SELECT \r\n  ai.descripcion AS \"Área de Impacto\",\r\n  ROUND(CAST(SUM(p.tiempo_paro_minutos) AS numeric), 2) AS \"Tiempo Paro (Minutos)\"\r\nFROM public.registros_paro p\r\n-- Conexión directa al código principal para no perder paros sin subcódigo\r\nJOIN public.codigo_paro cp ON p.fk_codigo_paro = cp.id\r\nJOIN public.area_impacto ai ON cp.fk_area_impacto = ai.id\r\nJOIN public.registros_produccion rp ON p.fk_registro_produccion = rp.id\r\nWHERE \r\n  -- 1. Filtro dinámico de Período\r\n  CASE '${periodo}'\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  -- 2. Filtro de Máquina\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- 3. Filtro de Turno (incluyendo nulos)\r\n  AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL)\r\nGROUP BY ai.descripcion\r\nORDER BY \"Tiempo Paro (Minutos)\" DESC;",
                         "sql": {
                           "columns": [
                             {
@@ -225,7 +225,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "piechart",
-            "version": "13.4.0-41805046240",
+            "version": "13.3.0",
             "spec": {
               "options": {
                 "displayLabels": [
@@ -295,7 +295,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "eg33rx0lopb0gf"
+                        "name": "ag3ci778ps7wgc"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -334,7 +334,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "barchart",
-            "version": "13.4.0-41805046240",
+            "version": "13.3.0",
             "spec": {
               "options": {
                 "barRadius": 0,
@@ -458,14 +458,14 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "eg33rx0lopb0gf"
+                        "name": "ag3ci778ps7wgc"
                       },
                       "spec": {
                         "dataset": "postgres",
                         "editorMode": "code",
                         "format": "table",
                         "rawQuery": true,
-                        "rawSql": "SELECT \r\n  rp.fecha AS \"Fecha\",\r\n  m.nombre AS \"Línea/Máquina\",\r\n  COALESCE(sp.descripcion, cp.descripcion) AS \"Causa del Paro\",\r\n  p.tiempo_paro_minutos AS \"Duración (Min)\",\r\n  CASE \r\n    WHEN p.tiempo_paro_minutos >= 30 THEN 'CRÍTICO'\r\n    WHEN p.tiempo_paro_minutos >= 15 THEN 'ADVERTENCIA'\r\n    ELSE 'NORMAL'\r\n  END AS \"Nivel de Alerta\"\r\nFROM public.registros_paro p\r\nJOIN public.registros_produccion rp ON p.fk_registro_produccion = rp.id\r\nJOIN public.maquinas m ON rp.fk_maquina = m.id\r\nLEFT JOIN public.subcodigo_paro sp ON p.fk_subcodigo_paro = sp.id\r\nLEFT JOIN public.codigo_paro cp ON sp.fk_codigo_paro = cp.id\r\nWHERE p.tiempo_paro_minutos >= 15\r\n  -- 1. Filtro dinámico de Período (reemplaza a $__timeFilter directo)\r\n  AND CASE '${periodo}'\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  -- 2. Filtro de Máquina\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- 3. Filtro de Turno (incluyendo nulos)\r\n  AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL)\r\nORDER BY rp.fecha DESC;",
+                        "rawSql": "SELECT \r\n  rp.fecha AS \"Fecha\",\r\n  m.nombre AS \"Línea/Máquina\",\r\n  \r\n  -- Mostramos el código general siempre\r\n  cp.descripcion AS \"Causa Principal\",\r\n  \r\n  -- Mostramos el subcódigo si existe, si no, indicamos que no aplica\r\n  COALESCE(sp.descripcion, 'Sin detalle') AS \"Detalle (Subcódigo)\",\r\n  \r\n  -- Opcional: Si prefieres todo en una sola columna, puedes usar esta línea en lugar de las dos anteriores:\r\n  -- cp.descripcion || COALESCE(' - ' || sp.descripcion, '') AS \"Causa del Paro\",\r\n  \r\n  p.tiempo_paro_minutos AS \"Duración (Min)\",\r\n  CASE \r\n    WHEN p.tiempo_paro_minutos >= 30 THEN 'CRÍTICO'\r\n    WHEN p.tiempo_paro_minutos >= 15 THEN 'ADVERTENCIA'\r\n    ELSE 'NORMAL'\r\n  END AS \"Nivel de Alerta\"\r\nFROM public.registros_paro p\r\nJOIN public.registros_produccion rp ON p.fk_registro_produccion = rp.id\r\nJOIN public.maquinas m ON rp.fk_maquina = m.id\r\n-- 1. JOIN obligatorio al código principal\r\nJOIN public.codigo_paro cp ON p.fk_codigo_paro = cp.id\r\n-- 2. LEFT JOIN al subcódigo (porque puede ser nulo)\r\nLEFT JOIN public.subcodigo_paro sp ON p.fk_subcodigo_paro = sp.id\r\nWHERE p.tiempo_paro_minutos >= 15\r\n  -- 1. Filtro dinámico de Período\r\n  AND CASE '${periodo}'\r\n    WHEN 'hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'Hoy'              THEN rp.fecha = CURRENT_DATE\r\n    WHEN 'ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN 'Ayer'             THEN rp.fecha = CURRENT_DATE - INTERVAL '1 day'\r\n    WHEN '7d'               THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN 'Últimos 7 Días'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '7 days'\r\n    WHEN '30d'              THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'Últimos 30 Días'  THEN rp.fecha >= CURRENT_DATE - INTERVAL '30 days'\r\n    WHEN 'este_mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'Este Mes'         THEN rp.fecha >= DATE_TRUNC('month', CURRENT_DATE)::date\r\n    WHEN 'este_anio'        THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN 'Año Actual (YTD)' THEN rp.fecha >= DATE_TRUNC('year', CURRENT_DATE)::date\r\n    WHEN '1_anio'           THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN 'Último Año'       THEN rp.fecha >= CURRENT_DATE - INTERVAL '1 year'\r\n    WHEN '3_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN 'Últimos 3 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '3 years'\r\n    WHEN '5_anios'          THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    WHEN 'Últimos 5 Años'   THEN rp.fecha >= CURRENT_DATE - INTERVAL '5 years'\r\n    ELSE $__timeFilter(rp.fecha)\r\n  END\r\n  -- 2. Filtro de Máquina\r\n  AND rp.fk_maquina IN ($maquina)\r\n  -- 3. Filtro de Turno (incluyendo nulos)\r\n  AND (rp.fk_turno IN ($turno) OR rp.fk_turno IS NULL)\r\nORDER BY rp.fecha DESC;",
                         "sql": {
                           "columns": [
                             {
@@ -497,7 +497,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "table",
-            "version": "13.4.0-41805046240",
+            "version": "13.3.0",
             "spec": {
               "options": {
                 "cellHeight": "sm",
@@ -626,7 +626,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "eg33rx0lopb0gf"
+                        "name": "ag3ci778ps7wgc"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -665,7 +665,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "gauge",
-            "version": "13.4.0-41805046240",
+            "version": "13.3.0",
             "spec": {
               "options": {
                 "barShape": "flat",
@@ -743,7 +743,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "eg33rx0lopb0gf"
+                        "name": "ag3ci778ps7wgc"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -782,7 +782,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "table",
-            "version": "13.4.0-41805046240",
+            "version": "13.3.0",
             "spec": {
               "options": {
                 "cellHeight": "sm",
@@ -898,7 +898,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "eg33rx0lopb0gf"
+                        "name": "ag3ci778ps7wgc"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -937,7 +937,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.4.0-41805046240",
+            "version": "13.3.0",
             "spec": {
               "options": {
                 "legend": {
@@ -1036,7 +1036,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "eg33rx0lopb0gf"
+                        "name": "ag3ci778ps7wgc"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -1075,7 +1075,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "barchart",
-            "version": "13.4.0-41805046240",
+            "version": "13.3.0",
             "spec": {
               "options": {
                 "barRadius": 0.05,
@@ -1165,7 +1165,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "eg33rx0lopb0gf"
+                        "name": "ag3ci778ps7wgc"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -1204,7 +1204,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.4.0-41805046240",
+            "version": "13.3.0",
             "spec": {
               "options": {
                 "colorMode": "background",
@@ -1441,7 +1441,7 @@
             "group": "grafana-postgresql-datasource",
             "version": "v0",
             "datasource": {
-              "name": "eg33rx0lopb0gf"
+              "name": "ag3ci778ps7wgc"
             },
             "spec": {
               "dataset": "postgres",
@@ -1520,7 +1520,7 @@
             "group": "grafana-postgresql-datasource",
             "version": "v0",
             "datasource": {
-              "name": "eg33rx0lopb0gf"
+              "name": "ag3ci778ps7wgc"
             },
             "spec": {
               "dataset": "postgres",

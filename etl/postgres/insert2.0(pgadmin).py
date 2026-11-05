@@ -6,7 +6,7 @@ import hashlib
 import json
 
 #conexion a pgadmin
-DB_URI = "postgresql://postgres:1234@localhost:5432/taller5"
+DB_URI = "postgresql://postgres:1234@localhost:5432/PinturasyVinilos"
 
 df = pd.read_excel('BD_actividad.xlsx', sheet_name='Base De Datos (2)', header=1)
 
@@ -99,32 +99,36 @@ try:
             for i in range(1, 19):
                 minutos = safe_float(row.get(f'Codigo de paro {i}'))
                 if minutos > 0:
+                    # 1. Obtener SIEMPRE el fk_codigo_paro principal (ej: "01", "02"... "18")
+                    codigo_str = str(i).zfill(2)
+                    fk_codigo = obtener_id(cursor, "codigo_paro", "codigo", codigo_str)
+                    
+                    # 2. Buscar subcódigo SOLO si es 1, 3 o 5
+                    fk_subcodigo = None
                     subcodigo_texto = None
+                    
                     if i == 1: subcodigo_texto = row.get('Sub Codigo de paro 1')
                     elif i == 3: subcodigo_texto = row.get('Subcodigo 3')
                     elif i == 5: subcodigo_texto = row.get('Subcodigo 5')
                     
-                    fk_subcodigo = None
                     if pd.notna(subcodigo_texto) and str(subcodigo_texto).strip() != "":
                         texto_limpio = mapeo_subcodigos.get(str(subcodigo_texto).strip(), str(subcodigo_texto).strip())
                         fk_subcodigo = obtener_id(cursor, "subcodigo_paro", "codigo", str(texto_limpio).split(" ")[0])
                     
-                    if fk_subcodigo is None:
-                        fk_subcodigo = obtener_id(cursor, "codigo_paro", "codigo", str(i).zfill(2))
-                    
                     obs_final = str(row.get('Observaciones de paro', '')) if pd.notna(row.get('Observaciones de paro')) else None
                     
-                    # Generación de Clave Hash Única por evento de paro
-                    hash_str = f"{id_produccion}-{fk_subcodigo}-{minutos}-{i}-{fecha_base}"
+                    # Generación de Clave Hash Única ajustada (incluyendo ambas FKs)
+                    hash_str = f"{id_produccion}-{fk_codigo}-{fk_subcodigo}-{minutos}-{fecha_base}"
                     hash_evento = hashlib.sha256(hash_str.encode()).hexdigest()
                     
-                    lote_paros.append((id_produccion, fk_subcodigo, minutos, obs_final, hash_evento))
+                    # Añadimos fk_codigo y fk_subcodigo a la tupla
+                    lote_paros.append((id_produccion, fk_codigo, fk_subcodigo, minutos, obs_final, hash_evento))
             
-            # BULK INSERT Idempotente para Paros
+            # BULK INSERT Idempotente para Paros (Ahora inserta ambas FKs)
             if lote_paros:
                 insert_paros_query = """
                     INSERT INTO public.registros_paro 
-                    (fk_registro_produccion, fk_subcodigo_paro, tiempo_paro_minutos, observaciones, hash_evento)
+                    (fk_registro_produccion, fk_codigo_paro, fk_subcodigo_paro, tiempo_paro_minutos, observaciones, hash_evento)
                     VALUES %s
                     ON CONFLICT (hash_evento) DO NOTHING
                 """
