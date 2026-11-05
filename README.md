@@ -13,6 +13,8 @@ bi-oee-paros-vinilos/
 │   ├── createtables.sql
 │   ├── insertsestaticos.sql
 │   └── createcalendario.sql
+|   └── Restartables.sql
+|   └── triggerslogicanegocio.sql
 ├── etl/
 │   └── postgres/
 │       ├── insert2.0(pgadmin).py
@@ -20,7 +22,7 @@ bi-oee-paros-vinilos/
 ├── grafana/
 │   └── dashboardgrafana.json
 ├── powerbi/
-│   ├── dashboardpowerbi.Report/
+│   ├── dashboardpowerbi_.Report/
 │   └── definition.pbir
 ├── doc/
 │   └── BI_ProyectoFinal_Javier_Isaza-Diego_Mazo.pdf
