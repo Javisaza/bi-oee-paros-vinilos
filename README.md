@@ -7,23 +7,27 @@ Solución de Inteligencia de Negocios de extremo a extremo para el monitoreo de 
 
 ## Estructura Github
 
-  bi-oee-paros-vinilos/
-  ├── sql/
-  │   ├── createtables.sql
-  │   ├── insertsestaticos.sql
-  │   └── createcalendario.sql
-  ├── etl/
-  │   └── postgres/
-  │       ├── insert2.0(pgadmin).py
-  │       └── insertreferencias.py
-  ├── grafana/
-  │   └── dashboardgrafana.json
-  ├── powerbi/
-  │   ├── dashboardpowerbi.Report/
-  │   └── definition.pbir
-  ├── doc/
-  │   └── BI_ProyectoFinal_Javier_Isaza-Diego_Mazo.pdf
-  └── README.md
+```
+bi-oee-paros-vinilos/
+├── sql/
+│   ├── createtables.sql
+│   ├── insertsestaticos.sql
+│   └── createcalendario.sql
+├── etl/
+│   └── postgres/
+│       ├── insert2.0(pgadmin).py
+│       └── insertreferencias.py
+├── grafana/
+│   └── dashboardgrafana.json
+├── powerbi/
+│   ├── dashboardpowerbi.Report/
+│   └── definition.pbir
+├── doc/
+│   └── BI_ProyectoFinal_Javier_Isaza-Diego_Mazo.pdf
+└── README.md
+```
+
+
 
 ## Proceso para reproducir la solución desde cero
 
