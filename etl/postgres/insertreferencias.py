@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2.extras import execute_values
 
 # Conexión directa a tu base de datos local en pgAdmin
-DB_URI = "postgresql://postgres:1234@localhost:5432/taller5"
+DB_URI = "postgresql://postgres:1234@localhost:5432/PinturasyVinilos"
 
 def obtener_id(cursor, tabla, columna, valor):
     if pd.isna(valor): return None
